@@ -111,6 +111,14 @@ app.layout = html.Div(
                     "value": "177fw6EAGl4vgOkqQ6EOo4rBNJyis41X6",
                 },
                 {
+                    "label": "Six by Cassidy (BFDI)",
+                    "value": "15r5hgymt_8_iA1MnXAGzaVv3cFQLtqsv",
+                },
+                {
+                    "label": "Rusty Coin by Cassidy (BFDI)",
+                    "value": "1BNHEnEdnxpdBk2NB1HlT4TBV0_oAuhnA",
+                },
+                {
                     "label": "Pepper Roni by SuperScrambl (Lego Island 2)",
                     "value": "17sKMTmuPufh-02x2vNw2IlydtP9wiZv7",
                 },
