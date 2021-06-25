@@ -66,6 +66,50 @@ app.layout = html.Div(
                     "label": "Pinkie (singing)",
                     "value": "19cdMqNJJUFFkurUgYG8ISqr7VLc_6_Co",
                 },
+                {
+                    "label": "Trixie (MLP)",
+                    "value": "1Abz2A2dAwFNhFmqMsyBXRuv9KUhmewEf",
+                },
+                {
+                    "label": "Four (BFDI)",
+                    "value": "1VPgQtt04aTnR0z1wH3y_ae16L9lbG_70",
+                },
+                {
+                    "label": "X (BFDI)",
+                    "value": "18wbWVhfhHOuG48uAPTuLRwpEiPtEm0e6",
+                },
+                {
+                    "label": "Leafy (BFDI)",
+                    "value": "185XTt5B7_Bg5_nMN1rbElWlS24k1v7yx",
+                },
+                {
+                    "label": "Firey (BFDI)",
+                    "value": "18_g1Uh3pOyqQ_9COGoGi3Xd2mees3jDQ",
+                },
+                {
+                    "label": "Donut (BFDI)",
+                    "value": "15qcawJiJEazdvUXq_PN-Qm-GgWs95kYY",
+                },
+                {
+                    "label": "Book (BFDI)",
+                    "value": "16h_x3Q9SGQ9Eb0wm3RGMGSn6VX7EKorM",
+                },
+                {
+                    "label": "Bracelety (BFDI)",
+                    "value": "18nMZp6t_pC-8fH1DEdh8m1e6KRvzJJDu",
+                },
+                {
+                    "label": "Bubble (BFDI)",
+                    "value": "18nXCZHDGn7dBSlrwTU-3GjuiVCAfvA21",
+                },
+                {
+                    "label": "Two (BFDI)",
+                    "value": "19HyrwINyRX41wusd7WmT2wU_XqYpVX3g",
+                },
+                {
+                    "label": "Barf Bag (BFDI)",
+                    "value": "177fw6EAGl4vgOkqQ6EOo4rBNJyis41X6",
+                },
                 {"label": "Custom model", "value": "Custom"},
             ],
             value=None,
