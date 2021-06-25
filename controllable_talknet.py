@@ -55,60 +55,64 @@ app.layout = html.Div(
             id="model-dropdown",
             options=[
                 {
-                    "label": "Twilight (singing)",
+                    "label": "Twilight by SortAnon (singing MLP)",
                     "value": "1DEVEDfYegu1ffPtuGBX6cBUHPfzElY8C",
                 },
                 {
-                    "label": "Twilight (talking)",
+                    "label": "Twilight by SortAnon (talking MLP)",
                     "value": "1JukWe5hVIFOb4Df20bRi0pMSvlAIE2Jt",
                 },
                 {
-                    "label": "Pinkie (singing)",
+                    "label": "Pinkie by SortAnon (singing MLP)",
                     "value": "19cdMqNJJUFFkurUgYG8ISqr7VLc_6_Co",
                 },
                 {
-                    "label": "Trixie (MLP)",
+                    "label": "Trixie by Sami (MLP)",
                     "value": "1Abz2A2dAwFNhFmqMsyBXRuv9KUhmewEf",
                 },
                 {
-                    "label": "Four (BFDI)",
+                    "label": "Four by Sami (BFDI)",
                     "value": "1VPgQtt04aTnR0z1wH3y_ae16L9lbG_70",
                 },
                 {
-                    "label": "X (BFDI)",
+                    "label": "X by Sami (BFDI)",
                     "value": "18wbWVhfhHOuG48uAPTuLRwpEiPtEm0e6",
                 },
                 {
-                    "label": "Leafy (BFDI)",
+                    "label": "Leafy by Sami (BFDI)",
                     "value": "185XTt5B7_Bg5_nMN1rbElWlS24k1v7yx",
                 },
                 {
-                    "label": "Firey (BFDI)",
+                    "label": "Firey by Sami (BFDI)",
                     "value": "18_g1Uh3pOyqQ_9COGoGi3Xd2mees3jDQ",
                 },
                 {
-                    "label": "Donut (BFDI)",
+                    "label": "Donut by Sami (BFDI)",
                     "value": "15qcawJiJEazdvUXq_PN-Qm-GgWs95kYY",
                 },
                 {
-                    "label": "Book (BFDI)",
+                    "label": "Book by Sami (BFDI)",
                     "value": "16h_x3Q9SGQ9Eb0wm3RGMGSn6VX7EKorM",
                 },
                 {
-                    "label": "Bracelety (BFDI)",
+                    "label": "Bracelety by Sami (BFDI)",
                     "value": "18nMZp6t_pC-8fH1DEdh8m1e6KRvzJJDu",
                 },
                 {
-                    "label": "Bubble (BFDI)",
+                    "label": "Bubble by Sami (BFDI)",
                     "value": "18nXCZHDGn7dBSlrwTU-3GjuiVCAfvA21",
                 },
                 {
-                    "label": "Two (BFDI)",
+                    "label": "Two by Sami (BFDI)",
                     "value": "19HyrwINyRX41wusd7WmT2wU_XqYpVX3g",
                 },
                 {
-                    "label": "Barf Bag (BFDI)",
+                    "label": "Barf Bag by Sami (BFDI)",
                     "value": "177fw6EAGl4vgOkqQ6EOo4rBNJyis41X6",
+                },
+                {
+                    "label": "Pepper Roni by SuperScrambl (Lego Island 2)",
+                    "value": "17sKMTmuPufh-02x2vNw2IlydtP9wiZv7",
                 },
                 {"label": "Custom model", "value": "Custom"},
             ],
