@@ -218,6 +218,10 @@ app.layout = html.Div(
                     "label": "Pepper Roni from Lego Island 2 (Provided by SuperScrambl)",
                     "value": "17sKMTmuPufh-02x2vNw2IlydtP9wiZv7",
                 },
+                {
+                    "label": "Bugs Bunny (Provided by FrankZ)",
+                    "value": "197MlauXf64gOzU6mHlXcipnVUp49ZFON",
+                },
             ],
             value=None,
             style={
