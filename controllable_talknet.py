@@ -55,82 +55,169 @@ app.layout = html.Div(
             id="model-dropdown",
             options=[
                 {
-                    "label": "Twilight by SortAnon (singing MLP)",
-                    "value": "1DEVEDfYegu1ffPtuGBX6cBUHPfzElY8C",
+                    "label": "Custom model",
+                    "value": "Custom",
                 },
                 {
-                    "label": "Twilight by SortAnon (talking MLP)",
-                    "value": "1JukWe5hVIFOb4Df20bRi0pMSvlAIE2Jt",
+                    "label": "--- TALKING MLP MODELS ---",
+                    "value": "",
+                    "disabled": True,
                 },
                 {
-                    "label": "Pinkie by SortAnon (singing MLP)",
-                    "value": "19cdMqNJJUFFkurUgYG8ISqr7VLc_6_Co",
+                    "label": "Applejack",
+                    "value": "1kpEjZ3YqMN3chKSXODOqayEm581rxj4r",
                 },
                 {
-                    "label": "Trixie by Sami (MLP)",
+                    "label": "Celestia",
+                    "value": "1whXXcnXu9XPcI60xIkTEofpaDYDOw5yB",
+                },
+                {
+                    "label": "Chrysalis",
+                    "value": "1bb5jKAcQcEQbx1feVwT1UmAEgocINh-E",
+                },
+                {
+                    "label": "Discord",
+                    "value": "1Cg9Oc_K9UDe5WgVDAcaCSbbBoo-Npj1E",
+                },
+                {
+                    "label": "Fluttershy",
+                    "value": "1KgVnjrnxZTXgjnI56ilkq5G4UJCbbwZZ",
+                },
+                {
+                    "label": "Luna",
+                    "value": "1_ztAbe5YArCMwyyQ_G9lUiz74ym5xJKC",
+                },
+                {
+                    "label": "Maud Pie",
+                    "value": "132G6oD0HHPPn4t1H6IkYv18_F0UVLWgi",
+                },
+                {
+                    "label": "Pinkie Pie",
+                    "value": "1CdYZ2r52mtgJsFs88U0ZViMSnzpQ_HRp",
+                },
+                {
+                    "label": "Rainbow Dash",
+                    "value": "1k3EMXxLC0fLvfxzGbeP6B6plgu9hqCSx",
+                },
+                {
+                    "label": "Rarity",
+                    "value": "1QWBvQSso4guc1LRUD40WRJ8DY2CfqHGK",
+                },
+                {
+                    "label": "Spike",
+                    "value": "1TKFdmFLttjjzByj2fZW8J70ZHjR-RTwc",
+                },
+                {
+                    "label": "Starlight Glimmer",
+                    "value": "1M1AMBq_xjwGTNzRUCXtSLIDJHbcSs3zR",
+                },
+                {
+                    "label": "Sunset Shimmer",
+                    "value": "1x1aJt06lBvzUWRlxJ9CEKcFHxQxZPpST",
+                },
+                {
+                    "label": "Trixie (SortAnon Version)",
+                    "value": "1a3CYt0-oTTSFjxtZvAVMpClTmQteYua5",
+                },
+                {
+                    "label": "Trixie (BFDIanon Version)",
                     "value": "1Abz2A2dAwFNhFmqMsyBXRuv9KUhmewEf",
                 },
                 {
-                    "label": "Four by Sami (BFDI)",
+                    "label": "Twilight Sparkle",
+                    "value": "1QnOliOAmerMUNuo2wXoH-YoainoSjZen",
+                },
+                {
+                    "label": "Twilight (whispering)",
+                    "value": "14_TUQVirITdyBh9etfNV8KFFhi_PUs30",
+                },
+                {
+                    "label": "Zecora",
+                    "value": "1gL0hqqB7952Q1S185moQd_DRCFfIa3_g",
+                },
+                {
+                    "label": "--- SINGING MLP MODELS ---",
+                    "value": "",
+                    "disabled": True,
+                },
+                {
+                    "label": "Pinkie (singing)",
+                    "value": "19cdMqNJJUFFkurUgYG8ISqr7VLc_6_Co",
+                },
+                {
+                    "label": "Twilight (singing)",
+                    "value": "1DEVEDfYegu1ffPtuGBX6cBUHPfzElY8C",
+                },
+                {
+                    "label": "--- TALKING BFDI MODELS ---",
+                    "value": "",
+                    "disabled": True,
+                },
+                {
+                    "label": "Four",
                     "value": "1VPgQtt04aTnR0z1wH3y_ae16L9lbG_70",
                 },
                 {
-                    "label": "X by Sami (BFDI)",
+                    "label": "X",
                     "value": "18wbWVhfhHOuG48uAPTuLRwpEiPtEm0e6",
                 },
                 {
-                    "label": "Leafy by Sami (BFDI)",
+                    "label": "Leafy",
                     "value": "185XTt5B7_Bg5_nMN1rbElWlS24k1v7yx",
                 },
                 {
-                    "label": "Firey by Sami (BFDI)",
+                    "label": "Firey",
                     "value": "18_g1Uh3pOyqQ_9COGoGi3Xd2mees3jDQ",
                 },
                 {
-                    "label": "Donut by Sami (BFDI)",
+                    "label": "Donut",
                     "value": "15qcawJiJEazdvUXq_PN-Qm-GgWs95kYY",
                 },
                 {
-                    "label": "Book by Sami (BFDI)",
+                    "label": "Book",
                     "value": "16h_x3Q9SGQ9Eb0wm3RGMGSn6VX7EKorM",
                 },
                 {
-                    "label": "Bracelety by Sami (BFDI)",
+                    "label": "Bracelety",
                     "value": "18nMZp6t_pC-8fH1DEdh8m1e6KRvzJJDu",
                 },
                 {
-                    "label": "Bubble by Sami (BFDI)",
+                    "label": "Bubble",
                     "value": "18nXCZHDGn7dBSlrwTU-3GjuiVCAfvA21",
                 },
                 {
-                    "label": "Two by Sami (BFDI)",
+                    "label": "Two",
                     "value": "19HyrwINyRX41wusd7WmT2wU_XqYpVX3g",
                 },
                 {
-                    "label": "Barf Bag by Sami (BFDI)",
+                    "label": "Barf Bag",
                     "value": "177fw6EAGl4vgOkqQ6EOo4rBNJyis41X6",
                 },
                 {
-                    "label": "Pen by Sami (BFDI)",
+                    "label": "Pen",
                     "value": "18aCV9khszBWQSNDbYhhfZ2vKEGP7Lu-S",
                 },
                 {
-                    "label": "Gelatin by Sami (BFDI)",
+                    "label": "Gelatin",
                     "value": "13TjkUUB1ouKF9VSKV0BCoX-Jqwky26C2",
                 },
                 {
-                    "label": "Six by Cassidy (BFDI)",
+                    "label": "Six (Provided by Cassidy)",
                     "value": "15r5hgymt_8_iA1MnXAGzaVv3cFQLtqsv",
                 },
                 {
-                    "label": "Rusty Coin by Cassidy (BFDI)",
+                    "label": "Rusty Coin (Provided by Cassidy)",
                     "value": "1BNHEnEdnxpdBk2NB1HlT4TBV0_oAuhnA",
                 },
                 {
-                    "label": "Pepper Roni by SuperScrambl (Lego Island 2)",
+                    "label": "--- MISC TALKING MODELS ---",
+                    "value": "",
+                    "disabled": True,
+                },
+                {
+                    "label": "Pepper Roni from Lego Island 2 (Provided by SuperScrambl)",
                     "value": "17sKMTmuPufh-02x2vNw2IlydtP9wiZv7",
                 },
-                {"label": "Custom model", "value": "Custom"},
             ],
             value=None,
             style={
@@ -154,7 +241,7 @@ app.layout = html.Div(
             },
         ),
         html.Label(
-            "Upload reference audio (22KHz mono WAV) to " + UPLOAD_DIRECTORY,
+            "Upload reference audio to " + UPLOAD_DIRECTORY,
             htmlFor="reference-dropdown",
         ),
         dcc.Store(id="current-f0s"),
@@ -660,17 +747,22 @@ def download_model(model, custom_model):
         drive_id = model
     if not os.path.exists(os.path.join(UPLOAD_DIRECTORY, drive_id)):
         os.mkdir(os.path.join(UPLOAD_DIRECTORY, drive_id))
-
+        zip_path = os.path.join(UPLOAD_DIRECTORY, drive_id, "model.zip")
         gdown.download(
             d + drive_id,
-            os.path.join(UPLOAD_DIRECTORY, drive_id, "model.zip"),
+            zip_path,
             quiet=False,
         )
-        with zipfile.ZipFile(
-            os.path.join(UPLOAD_DIRECTORY, drive_id, "model.zip"), "r"
-        ) as zip_ref:
+        if not os.path.exists(zip_path):
+            os.rmdir(os.path.join(UPLOAD_DIRECTORY, drive_id))
+            return ("Model download failed", None, None)
+        if os.stat(zip_path).st_size < 16:
+            os.remove(zip_path)
+            os.rmdir(os.path.join(UPLOAD_DIRECTORY, drive_id))
+            return ("Model zip is empty", None, None)
+        with zipfile.ZipFile(zip_path, "r") as zip_ref:
             zip_ref.extractall(os.path.join(UPLOAD_DIRECTORY, drive_id))
-        os.remove(os.path.join(UPLOAD_DIRECTORY, drive_id, "model.zip"))
+        os.remove(zip_path)
 
     # Download super-resolution HiFi-GAN
     sr_path = "hifi-gan/hifisr"
