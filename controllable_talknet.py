@@ -230,6 +230,10 @@ app.layout = html.Div(
                     "label": "Soldier (Provided by Anon)",
                     "value": "1Gt7sD4fsU0aC06V2zQsn4Vrnj6g2E6xQ",
                 },
+                {
+                    "label": "Spongebob (Provided by Gosmokeless28)",
+                    "value": "189Syin37QOEJ5OaF5qCXGrwqsDqSCRKH",
+                },
             ],
             value=None,
             style={
