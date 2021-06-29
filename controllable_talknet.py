@@ -222,6 +222,14 @@ app.layout = html.Div(
                     "label": "Bugs Bunny (Provided by FrankZ)",
                     "value": "197MlauXf64gOzU6mHlXcipnVUp49ZFON",
                 },
+                {
+                    "label": "Mister Rogers (Provided by Anon)",
+                    "value": "1qbcYrxgO3f3RIWfOrL9QqFJVuzy0H_W_",
+                },
+                {
+                    "label": "Soldier (Provided by Anon)",
+                    "value": "1Gt7sD4fsU0aC06V2zQsn4Vrnj6g2E6xQ",
+                },
             ],
             value=None,
             style={
