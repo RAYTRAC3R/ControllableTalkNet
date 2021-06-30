@@ -106,7 +106,7 @@
 	{"source": "Lego",
     "characters": [
         {
-            "name": "Pepper Roni",
+            "name": "Pepper Roni (Provided by SuperScrambl)",
             "drive_id": "17sKMTmuPufh-02x2vNw2IlydtP9wiZv7",
             "is_singing": false
         }
@@ -114,7 +114,7 @@
 	{"source": "Looney Tunes",
     "characters": [
         {
-            "name": "Bugs Bunny",
+            "name": "Bugs Bunny (Provided by Frank Z)",
             "drive_id": "197MlauXf64gOzU6mHlXcipnVUp49ZFON",
             "is_singing": false
         }
@@ -138,7 +138,7 @@
 	{"source": "Spongebob Squarepants",
     "characters": [
         {
-            "name": "Spongebob",
+            "name": "Spongebob (Provided by Gosmokeless28)",
             "drive_id": "189Syin37QOEJ5OaF5qCXGrwqsDqSCRKH",
             "is_singing": false
         }
