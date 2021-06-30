@@ -26,6 +26,7 @@ import resampy
 import traceback
 import ffmpeg
 import time
+import uuid
 
 sys.path.append("hifi-gan")
 from env import AttrDict
@@ -40,6 +41,7 @@ torch.set_grad_enabled(False)
 app.layout = html.Div(
     children=[
         html.H1(
+            id="header",
             children="Controllable TalkNet",
             style={
                 "font-family": "EquestriaWebfont",
@@ -59,190 +61,15 @@ app.layout = html.Div(
                     "value": "Custom",
                 },
                 {
-                    "label": "--- TALKING MLP MODELS ---",
+                    "label": "--- ERROR LOADING MODEL LISTS ---",
                     "value": "",
                     "disabled": True,
-                },
-                {
-                    "label": "Applejack",
-                    "value": "1kpEjZ3YqMN3chKSXODOqayEm581rxj4r",
-                },
-                {
-                    "label": "Celestia",
-                    "value": "1whXXcnXu9XPcI60xIkTEofpaDYDOw5yB",
-                },
-                {
-                    "label": "Chrysalis",
-                    "value": "1bb5jKAcQcEQbx1feVwT1UmAEgocINh-E",
-                },
-                {
-                    "label": "Discord",
-                    "value": "1Cg9Oc_K9UDe5WgVDAcaCSbbBoo-Npj1E",
-                },
-                {
-                    "label": "Fluttershy",
-                    "value": "1KgVnjrnxZTXgjnI56ilkq5G4UJCbbwZZ",
-                },
-                {
-                    "label": "Luna",
-                    "value": "1_ztAbe5YArCMwyyQ_G9lUiz74ym5xJKC",
-                },
-                {
-                    "label": "Maud Pie",
-                    "value": "132G6oD0HHPPn4t1H6IkYv18_F0UVLWgi",
-                },
-                {
-                    "label": "Pinkie Pie",
-                    "value": "1CdYZ2r52mtgJsFs88U0ZViMSnzpQ_HRp",
-                },
-                {
-                    "label": "Rainbow Dash",
-                    "value": "1k3EMXxLC0fLvfxzGbeP6B6plgu9hqCSx",
-                },
-                {
-                    "label": "Rarity",
-                    "value": "1QWBvQSso4guc1LRUD40WRJ8DY2CfqHGK",
-                },
-                {
-                    "label": "Spike",
-                    "value": "1TKFdmFLttjjzByj2fZW8J70ZHjR-RTwc",
-                },
-                {
-                    "label": "Starlight Glimmer",
-                    "value": "1M1AMBq_xjwGTNzRUCXtSLIDJHbcSs3zR",
-                },
-                {
-                    "label": "Sunset Shimmer",
-                    "value": "1x1aJt06lBvzUWRlxJ9CEKcFHxQxZPpST",
-                },
-                {
-                    "label": "Trixie (SortAnon Version)",
-                    "value": "1a3CYt0-oTTSFjxtZvAVMpClTmQteYua5",
-                },
-                {
-                    "label": "Trixie (BFDIanon Version)",
-                    "value": "1Abz2A2dAwFNhFmqMsyBXRuv9KUhmewEf",
-                },
-                {
-                    "label": "Twilight Sparkle",
-                    "value": "1QnOliOAmerMUNuo2wXoH-YoainoSjZen",
-                },
-                {
-                    "label": "Twilight (whispering)",
-                    "value": "14_TUQVirITdyBh9etfNV8KFFhi_PUs30",
-                },
-                {
-                    "label": "Zecora",
-                    "value": "1gL0hqqB7952Q1S185moQd_DRCFfIa3_g",
-                },
-                {
-                    "label": "--- SINGING MLP MODELS ---",
-                    "value": "",
-                    "disabled": True,
-                },
-                {
-                    "label": "Pinkie (singing)",
-                    "value": "19cdMqNJJUFFkurUgYG8ISqr7VLc_6_Co",
-                },
-                {
-                    "label": "Twilight (singing)",
-                    "value": "1DEVEDfYegu1ffPtuGBX6cBUHPfzElY8C",
-                },
-                {
-                    "label": "--- TALKING BFDI MODELS ---",
-                    "value": "",
-                    "disabled": True,
-                },
-                {
-                    "label": "Four",
-                    "value": "1VPgQtt04aTnR0z1wH3y_ae16L9lbG_70",
-                },
-                {
-                    "label": "X",
-                    "value": "18wbWVhfhHOuG48uAPTuLRwpEiPtEm0e6",
-                },
-                {
-                    "label": "Leafy",
-                    "value": "185XTt5B7_Bg5_nMN1rbElWlS24k1v7yx",
-                },
-                {
-                    "label": "Firey",
-                    "value": "18_g1Uh3pOyqQ_9COGoGi3Xd2mees3jDQ",
-                },
-                {
-                    "label": "Donut",
-                    "value": "15qcawJiJEazdvUXq_PN-Qm-GgWs95kYY",
-                },
-                {
-                    "label": "Book",
-                    "value": "16h_x3Q9SGQ9Eb0wm3RGMGSn6VX7EKorM",
-                },
-                {
-                    "label": "Bracelety",
-                    "value": "18nMZp6t_pC-8fH1DEdh8m1e6KRvzJJDu",
-                },
-                {
-                    "label": "Bubble",
-                    "value": "18nXCZHDGn7dBSlrwTU-3GjuiVCAfvA21",
-                },
-                {
-                    "label": "Two",
-                    "value": "19HyrwINyRX41wusd7WmT2wU_XqYpVX3g",
-                },
-                {
-                    "label": "Barf Bag",
-                    "value": "177fw6EAGl4vgOkqQ6EOo4rBNJyis41X6",
-                },
-                {
-                    "label": "Pen",
-                    "value": "18aCV9khszBWQSNDbYhhfZ2vKEGP7Lu-S",
-                },
-                {
-                    "label": "Gelatin",
-                    "value": "13TjkUUB1ouKF9VSKV0BCoX-Jqwky26C2",
-                },
-                {
-                    "label": "Flower",
-                    "value": "1515C2Q1XMdXylX6GIXAi7J9V2M9YeB95",
-                },
-                {
-                    "label": "Six (Provided by Cassidy)",
-                    "value": "15r5hgymt_8_iA1MnXAGzaVv3cFQLtqsv",
-                },
-                {
-                    "label": "Rusty Coin (Provided by Cassidy)",
-                    "value": "1BNHEnEdnxpdBk2NB1HlT4TBV0_oAuhnA",
-                },
-                {
-                    "label": "--- MISC TALKING MODELS ---",
-                    "value": "",
-                    "disabled": True,
-                },
-                {
-                    "label": "Pepper Roni from Lego Island 2 (Provided by SuperScrambl)",
-                    "value": "17sKMTmuPufh-02x2vNw2IlydtP9wiZv7",
-                },
-                {
-                    "label": "Bugs Bunny (Provided by FrankZ)",
-                    "value": "197MlauXf64gOzU6mHlXcipnVUp49ZFON",
-                },
-                {
-                    "label": "Mister Rogers (Provided by Anon)",
-                    "value": "1qbcYrxgO3f3RIWfOrL9QqFJVuzy0H_W_",
-                },
-                {
-                    "label": "Soldier (Provided by Anon)",
-                    "value": "1Gt7sD4fsU0aC06V2zQsn4Vrnj6g2E6xQ",
-                },
-                {
-                    "label": "Spongebob (Provided by Gosmokeless28)",
-                    "value": "189Syin37QOEJ5OaF5qCXGrwqsDqSCRKH",
                 },
             ],
             value=None,
             style={
                 "max-width": "90vw",
-                "width": "20em",
+                "width": "35em",
                 "margin-bottom": "0.7em",
             },
         ),
@@ -333,7 +160,7 @@ app.layout = html.Div(
                         {"label": "Set pitch multiplier", "value": "pf"},
                         {"label": "Disable reference audio", "value": "dra"},
                     ],
-                    value=["pc"],
+                    value=[],
                 ),
                 dcc.Input(
                     id="pitch-factor",
@@ -413,6 +240,117 @@ app.layout = html.Div(
         "background-color": "#FFF",
     },
 )
+
+
+@app.callback(
+    dash.dependencies.Output("model-dropdown", "options"),
+    dash.dependencies.Input("header", "children"),
+)
+def init_dropdown(value):
+    dropdown = [
+        {
+            "label": "Custom model",
+            "value": "Custom|default",
+        }
+    ]
+    prev_values = ["Custom|default"]
+
+    def add_to_dropdown(entry):
+        if entry["value"] in prev_values:
+            return
+        dropdown.append(entry)
+        prev_values.append(entry["value"])
+
+    all_dict = {}
+    for filename in os.listdir("model_lists"):
+        if len(filename) < 5 or filename[-5:].lower() != ".json":
+            continue
+        with open(os.path.join("model_lists", filename)) as f:
+            j = json.load(f)
+            for s in j:
+                for c in s["characters"]:
+                    c["source_file"] = filename[:-5]
+                if s["source"] not in all_dict:
+                    all_dict[s["source"]] = s["characters"]
+                else:
+                    all_dict[s["source"]].extend(s["characters"])
+    for k in sorted(all_dict):
+        seen_chars = []
+        seen_ids = []
+        characters = {}
+        characters_sing = {}
+        has_singers = False
+        for c in all_dict[k]:
+            if c["drive_id"] in seen_ids:
+                continue
+            seen_ids.append(c["drive_id"])
+            # Handle duplicate names
+            if c["name"] in seen_chars:
+                if c["name"] in characters:
+                    rename = (
+                        c["name"] + " [" + characters[c["name"]]["source_file"] + "]"
+                    )
+                    characters[rename] = characters[c["name"]]
+                    del characters[c["name"]]
+                c["name"] = c["name"] + " [" + c["source_file"] + "]"
+            else:
+                seen_chars.append(c["name"])
+
+            characters[c["name"]] = {
+                "drive_id": c["drive_id"],
+                "is_singing": c["is_singing"],
+                "source_file": c["source_file"],
+            }
+            if c["is_singing"]:
+                has_singers = True
+        if has_singers:
+            for ck in sorted(characters):
+                if characters[ck]["is_singing"]:
+                    characters_sing[ck] = characters[ck]
+                    del characters[ck]
+            separator = "--- " + k.strip().upper() + " MODELS (TALKING) ---"
+        else:
+            separator = "--- " + k.strip().upper() + " MODELS ---"
+        if len(characters) > 0:
+            add_to_dropdown(
+                {
+                    "label": separator,
+                    "value": str(uuid.uuid4()) + "|default",
+                    "disabled": True,
+                }
+            )
+            for ck in sorted(characters):
+                add_to_dropdown(
+                    {
+                        "label": ck,
+                        "value": characters[ck]["drive_id"] + "|default",
+                    }
+                )
+        if has_singers:
+            separator = "--- " + k.strip().upper() + " MODELS (SINGING) ---"
+            add_to_dropdown(
+                {
+                    "label": separator,
+                    "value": str(uuid.uuid4()) + "|default",
+                    "disabled": True,
+                }
+            )
+            for ck in sorted(characters_sing):
+                add_to_dropdown(
+                    {
+                        "label": ck,
+                        "value": characters_sing[ck]["drive_id"] + "|singing",
+                    }
+                )
+    if len(all_dict) == 0:
+        add_to_dropdown(
+            {
+                "label": "--- NO MODEL LISTS FOUND ---",
+                "value": str(uuid.uuid4()) + "|default",
+                "disabled": True,
+            }
+        )
+    return dropdown
 
 
 def load_hifigan(model_name, conf_name):
@@ -645,15 +583,25 @@ def f0_to_audio(f0s):
 
 
 @app.callback(
-    dash.dependencies.Output("custom-model", "style"),
     [
-        dash.dependencies.Input("model-dropdown", "value"),
+        dash.dependencies.Output("custom-model", "style"),
+        dash.dependencies.Output("pitch-options", "value"),
     ],
+    dash.dependencies.Input("model-dropdown", "value"),
+    dash.dependencies.State("pitch-options", "value"),
 )
-def update_model(value):
-    if value == "Custom":
-        return {"margin-bottom": "0.7em", "display": "block"}
-    return {"display": "none"}
+def update_model(model, options):
+    if model is not None and model.split("|")[0] == "Custom":
+        style = {"margin-bottom": "0.7em", "display": "block"}
+    else:
+        style = {"display": "none"}
+    new_options = options
+    if model is not None:
+        if "singing" in model.split("|")[1] and "pc" not in new_options:
+            new_options.append("pc")
+        elif "singing" not in model.split("|")[1] and "pc" in new_options:
+            new_options.remove("pc")
+    return [style, options]
 
 
 @app.callback(
@@ -765,23 +713,25 @@ def download_model(model, custom_model):
         drive_id = custom_model
     else:
         drive_id = model
-    if not os.path.exists(os.path.join(UPLOAD_DIRECTORY, drive_id)):
-        os.mkdir(os.path.join(UPLOAD_DIRECTORY, drive_id))
-        zip_path = os.path.join(UPLOAD_DIRECTORY, drive_id, "model.zip")
+    if not os.path.exists(os.path.join(UPLOAD_DIRECTORY, "models")):
+        os.mkdir(os.path.join(UPLOAD_DIRECTORY, "models"))
+    if not os.path.exists(os.path.join(UPLOAD_DIRECTORY, "models", drive_id)):
+        os.mkdir(os.path.join(UPLOAD_DIRECTORY, "models", drive_id))
+        zip_path = os.path.join(UPLOAD_DIRECTORY, "models", drive_id, "model.zip")
         gdown.download(
             d + drive_id,
             zip_path,
             quiet=False,
         )
         if not os.path.exists(zip_path):
-            os.rmdir(os.path.join(UPLOAD_DIRECTORY, drive_id))
+            os.rmdir(os.path.join(UPLOAD_DIRECTORY, "models", drive_id))
             return ("Model download failed", None, None)
         if os.stat(zip_path).st_size < 16:
             os.remove(zip_path)
-            os.rmdir(os.path.join(UPLOAD_DIRECTORY, drive_id))
+            os.rmdir(os.path.join(UPLOAD_DIRECTORY, "models", drive_id))
             return ("Model zip is empty", None, None)
         with zipfile.ZipFile(zip_path, "r") as zip_ref:
-            zip_ref.extractall(os.path.join(UPLOAD_DIRECTORY, drive_id))
+            zip_ref.extractall(os.path.join(UPLOAD_DIRECTORY, "models", drive_id))
         os.remove(zip_path)
 
     # Download super-resolution HiFi-GAN
@@ -794,8 +744,8 @@ def download_model(model, custom_model):
 
     return (
         None,
-        os.path.join(UPLOAD_DIRECTORY, drive_id, "TalkNetSpect.nemo"),
-        os.path.join(UPLOAD_DIRECTORY, drive_id, "hifiganmodel"),
+        os.path.join(UPLOAD_DIRECTORY, "models", drive_id, "TalkNetSpect.nemo"),
+        os.path.join(UPLOAD_DIRECTORY, "models", drive_id, "hifiganmodel"),
     )
 
 
@@ -854,7 +804,9 @@ def generate_audio(
             pitch_factor,
             None,
         ]
-    load_error, talknet_path, hifigan_path = download_model(model, custom_model)
+    load_error, talknet_path, hifigan_path = download_model(
+        model.split("|")[0], custom_model
+    )
     if load_error is not None:
         return [
             None,
