@@ -101,6 +101,11 @@
             "name": "Rusty Coin (Provided by Cassidy)",
             "drive_id": "1BNHEnEdnxpdBk2NB1HlT4TBV0_oAuhnA",
             "is_singing": false
+        },
+		{
+            "name": "Ruby (Provided by Cassidy)",
+            "drive_id": "16VGz9KL6kzWiUUHss7NFAArxAq5bjV3F",
+            "is_singing": false
         }
     ]},
 	{"source": "Lego",
