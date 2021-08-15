@@ -8,6 +8,7 @@ import dash_html_components as html
 from dash.exceptions import PreventUpdate
 import torch
 import numpy as np
+import tensorflow as tf
 import crepe
 import scipy
 from scipy.io import wavfile
@@ -36,9 +37,18 @@ from models import Generator
 from denoiser import Denoiser
 
 app = JupyterDash(__name__)
-UPLOAD_DIRECTORY = "/content"
+DEVICE = "cuda:0"
+CPU_PITCH = False
+RUN_PATH = os.path.dirname(os.path.realpath(__file__))
+if RUN_PATH == "/content":
+    UI_MODE = "colab"
+else:
+    UI_MODE = "offline"
 torch.set_grad_enabled(False)
+if CPU_PITCH:
+    tf.config.set_visible_devices([], "GPU")
 
+app.title = "Controllable TalkNet"
 app.layout = html.Div(
     children=[
         html.H1(
@@ -89,7 +99,7 @@ app.layout = html.Div(
             },
         ),
         html.Label(
-            "Upload reference audio to " + UPLOAD_DIRECTORY,
+            "Upload reference audio to " + RUN_PATH,
             htmlFor="reference-dropdown",
         ),
         dcc.Store(id="current-f0s"),
@@ -372,8 +382,8 @@ def load_hifigan(model_name, conf_name):
         json_config = json.loads(f.read())
     h = AttrDict(json_config)
     torch.manual_seed(h.seed)
-    hifigan = Generator(h).to(torch.device("cuda"))
-    state_dict_g = torch.load(model_name, map_location=torch.device("cuda"))
+    hifigan = Generator(h).to(torch.device(DEVICE))
+    state_dict_g = torch.load(model_name, map_location=torch.device(DEVICE))
     hifigan.load_state_dict(state_dict_g["generator"])
     hifigan.eval()
     hifigan.remove_weight_norm()
@@ -453,27 +463,23 @@ def preprocess_tokens(tokens, blank):
 
 
 def get_duration(wav_name, transcript):
-    if not os.path.exists(os.path.join(UPLOAD_DIRECTORY, "output")):
-        os.mkdir(os.path.join(UPLOAD_DIRECTORY, "output"))
+    if not os.path.exists(os.path.join(RUN_PATH, "temp")):
+        os.mkdir(os.path.join(RUN_PATH, "temp"))
     if "_" not in transcript:
         generate_json(
-            os.path.join(UPLOAD_DIRECTORY, "output", wav_name + "_conv.wav")
+            os.path.join(RUN_PATH, "temp", wav_name + "_conv.wav")
             + "|"
             + transcript.strip(),
-            os.path.join(UPLOAD_DIRECTORY, "output", wav_name + ".json"),
+            os.path.join(RUN_PATH, "temp", wav_name + ".json"),
         )
     else:
         generate_json(
-            os.path.join(UPLOAD_DIRECTORY, "output", wav_name + "_conv.wav")
-            + "|"
-            + "dummy",
-            os.path.join(UPLOAD_DIRECTORY, "output", wav_name + ".json"),
+            os.path.join(RUN_PATH, "temp", wav_name + "_conv.wav") + "|" + "dummy",
+            os.path.join(RUN_PATH, "temp", wav_name + ".json"),
         )
 
     data_config = {
-        "manifest_filepath": os.path.join(
-            UPLOAD_DIRECTORY, "output", wav_name + ".json"
-        ),
+        "manifest_filepath": os.path.join(RUN_PATH, "temp", wav_name + ".json"),
         "sample_rate": 22050,
         "batch_size": 1,
     }
@@ -645,7 +651,7 @@ playback_hide = {
 def update_filelist(n_clicks):
     filelist = []
     supported_formats = [".wav", ".ogg", ".mp3", "flac", ".aac"]
-    for x in sorted(os.listdir(UPLOAD_DIRECTORY)):
+    for x in sorted(os.listdir(RUN_PATH)):
         if x[-4:].lower() in supported_formats:
             filelist.append({"label": x, "value": x})
     return filelist
@@ -664,10 +670,10 @@ def update_filelist(n_clicks):
 )
 def select_file(dropdown_value):
     if dropdown_value is not None:
-        if not os.path.exists(os.path.join(UPLOAD_DIRECTORY, "output")):
-            os.mkdir(os.path.join(UPLOAD_DIRECTORY, "output"))
-        ffmpeg.input(os.path.join(UPLOAD_DIRECTORY, dropdown_value)).output(
-            os.path.join(UPLOAD_DIRECTORY, "output", dropdown_value + "_conv.wav"),
+        if not os.path.exists(os.path.join(RUN_PATH, "temp")):
+            os.mkdir(os.path.join(RUN_PATH, "temp"))
+        ffmpeg.input(os.path.join(RUN_PATH, dropdown_value)).output(
+            os.path.join(RUN_PATH, "temp", dropdown_value + "_conv.wav"),
             ar="22050",
             ac="1",
             acodec="pcm_s16le",
@@ -675,7 +681,7 @@ def select_file(dropdown_value):
             fflags="+bitexact",
         ).overwrite_output().run(quiet=True)
         fo_with_silence, f0_wo_silence = crepe_f0(
-            os.path.join(UPLOAD_DIRECTORY, "output", dropdown_value + "_conv.wav")
+            os.path.join(RUN_PATH, "temp", dropdown_value + "_conv.wav")
         )
         return [
             "Analyzed " + dropdown_value,
@@ -715,46 +721,53 @@ def debug_pitch(n_clicks, pitch_clicks, current_f0s):
 
 
 def download_model(model, custom_model):
-    global hifigan_sr, h2, denoiser_sr
-    d = "https://drive.google.com/uc?id="
-    if model == "Custom":
-        drive_id = custom_model
-    else:
-        drive_id = model
-    if not os.path.exists(os.path.join(UPLOAD_DIRECTORY, "models")):
-        os.mkdir(os.path.join(UPLOAD_DIRECTORY, "models"))
-    if not os.path.exists(os.path.join(UPLOAD_DIRECTORY, "models", drive_id)):
-        os.mkdir(os.path.join(UPLOAD_DIRECTORY, "models", drive_id))
-        zip_path = os.path.join(UPLOAD_DIRECTORY, "models", drive_id, "model.zip")
-        gdown.download(
-            d + drive_id,
-            zip_path,
-            quiet=False,
-        )
-        if not os.path.exists(zip_path):
-            os.rmdir(os.path.join(UPLOAD_DIRECTORY, "models", drive_id))
-            return ("Model download failed", None, None)
-        if os.stat(zip_path).st_size < 16:
+    try:
+        global hifigan_sr, h2, denoiser_sr
+        d = "https://drive.google.com/uc?id="
+        if model == "Custom":
+            drive_id = custom_model
+        else:
+            drive_id = model
+        if drive_id == "" or drive_id is None:
+            return ("Missing Drive ID", None, None)
+        if not os.path.exists(os.path.join(RUN_PATH, "models")):
+            os.mkdir(os.path.join(RUN_PATH, "models"))
+        if not os.path.exists(os.path.join(RUN_PATH, "models", drive_id)):
+            os.mkdir(os.path.join(RUN_PATH, "models", drive_id))
+            zip_path = os.path.join(RUN_PATH, "models", drive_id, "model.zip")
+            gdown.download(
+                d + drive_id,
+                zip_path,
+                quiet=False,
+            )
+            if not os.path.exists(zip_path):
+                os.rmdir(os.path.join(RUN_PATH, "models", drive_id))
+                return ("Model download failed", None, None)
+            if os.stat(zip_path).st_size < 16:
+                os.remove(zip_path)
+                os.rmdir(os.path.join(RUN_PATH, "models", drive_id))
+                return ("Model zip is empty", None, None)
+            with zipfile.ZipFile(zip_path, "r") as zip_ref:
+                zip_ref.extractall(os.path.join(RUN_PATH, "models", drive_id))
             os.remove(zip_path)
-            os.rmdir(os.path.join(UPLOAD_DIRECTORY, "models", drive_id))
-            return ("Model zip is empty", None, None)
-        with zipfile.ZipFile(zip_path, "r") as zip_ref:
-            zip_ref.extractall(os.path.join(UPLOAD_DIRECTORY, "models", drive_id))
-        os.remove(zip_path)
 
-    # Download super-resolution HiFi-GAN
-    sr_path = "hifi-gan/hifisr"
-    if not os.path.exists(sr_path):
-        gdown.download(d + "14fOprFAIlCQkVRxsfInhEPG0n-xN4QOa", sr_path, quiet=False)
-    if not os.path.exists(sr_path):
-        raise Exception("HiFI-GAN model failed to download!")
-    hifigan_sr, h2, denoiser_sr = load_hifigan(sr_path, "config_32k")
+        # Download super-resolution HiFi-GAN
+        sr_path = "hifi-gan/hifisr"
+        if not os.path.exists(sr_path):
+            gdown.download(
+                d + "14fOprFAIlCQkVRxsfInhEPG0n-xN4QOa", sr_path, quiet=False
+            )
+        if not os.path.exists(sr_path):
+            raise Exception("HiFI-GAN model failed to download!")
+        hifigan_sr, h2, denoiser_sr = load_hifigan(sr_path, "config_32k")
 
-    return (
-        None,
-        os.path.join(UPLOAD_DIRECTORY, "models", drive_id, "TalkNetSpect.nemo"),
-        os.path.join(UPLOAD_DIRECTORY, "models", drive_id, "hifiganmodel"),
-    )
+        return (
+            None,
+            os.path.join(RUN_PATH, "models", drive_id, "TalkNetSpect.nemo"),
+            os.path.join(RUN_PATH, "models", drive_id, "hifiganmodel"),
+        )
+    except Exception as e:
+        return (str(e), None, None)
 
 
 tnmodel, tnpath, tndurs, tnpitch = None, None, None, None
@@ -871,8 +884,11 @@ def generate_audio(
 
                 spect = tnmodel.force_spectrogram(
                     tokens=tokens,
-                    durs=torch.from_numpy(durs).view(1, -1).to("cuda:0"),
-                    f0=torch.FloatTensor(f0s).view(1, -1).to("cuda:0"),
+                    durs=torch.from_numpy(durs)
+                    .view(1, -1)
+                    .type(torch.LongTensor)
+                    .to(DEVICE),
+                    f0=torch.FloatTensor(f0s).view(1, -1).to(DEVICE),
                 )
 
             if hifipath != hifigan_path:
@@ -926,7 +942,7 @@ def generate_audio(
 
             # HiFi-GAN super-resolution
             wave = wave / MAX_WAV_VALUE
-            wave = torch.FloatTensor(wave).to(torch.device("cuda"))
+            wave = torch.FloatTensor(wave).to(torch.device(DEVICE))
             new_mel = mel_spectrogram(
                 wave.unsqueeze(0),
                 h2.n_fft,
