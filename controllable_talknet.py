@@ -5,6 +5,7 @@ import dash
 from jupyter_dash import JupyterDash
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
 import torch
 import numpy as np
@@ -29,6 +30,7 @@ import traceback
 import ffmpeg
 import time
 import uuid
+import re
 
 sys.path.append("hifi-gan")
 from env import AttrDict
@@ -42,11 +44,14 @@ CPU_PITCH = False
 RUN_PATH = os.path.dirname(os.path.realpath(__file__))
 if RUN_PATH == "/content":
     UI_MODE = "colab"
+elif os.path.exists("/talknet/is_docker"):
+    UI_MODE = "docker"
 else:
     UI_MODE = "offline"
 torch.set_grad_enabled(False)
 if CPU_PITCH:
     tf.config.set_visible_devices([], "GPU")
+DICT_PATH = os.path.join(RUN_PATH, "horsewords.clean")
 
 app.title = "Controllable TalkNet"
 app.layout = html.Div(
@@ -64,7 +69,7 @@ app.layout = html.Div(
             },
         ),
         html.Label("Character selection", htmlFor="model-dropdown"),
-        dcc.Dropdown(
+        dbc.Select(
             id="model-dropdown",
             options=[
                 {
@@ -101,6 +106,15 @@ app.layout = html.Div(
         html.Label(
             "Upload reference audio to " + RUN_PATH,
             htmlFor="reference-dropdown",
+            id="upload-label",
+        ),
+        dcc.Upload(
+            id="upload-audio",
+            children=html.Div(["Drag and drop or click to select a file to upload."]),
+            style={
+                "display": "none",
+            },
+            multiple=True,
         ),
         dcc.Store(id="current-f0s"),
         dcc.Store(id="current-f0s-nosilence"),
@@ -117,7 +131,7 @@ app.layout = html.Div(
                                 "margin-right": "10px",
                             },
                         ),
-                        dcc.Dropdown(
+                        dbc.Select(
                             id="reference-dropdown",
                             options=[],
                             value=None,
@@ -263,12 +277,43 @@ app.layout = html.Div(
     },
 )
 
+upload_display = {
+    "width": "100%",
+    "height": "60px",
+    "lineHeight": "60px",
+    "borderWidth": "1px",
+    "borderStyle": "dashed",
+    "borderRadius": "5px",
+    "textAlign": "center",
+    "margin": "10px",
+}
+
+playback_style = {
+    "margin-top": "0.3em",
+    "margin-bottom": "0.3em",
+    "display": "block",
+    "width": "600px",
+    "max-width": "90vw",
+}
+
+playback_hide = {
+    "display": "none",
+}
+
 
 @app.callback(
-    dash.dependencies.Output("model-dropdown", "options"),
+    [
+        dash.dependencies.Output("model-dropdown", "options"),
+        dash.dependencies.Output("upload-audio", "style"),
+    ],
     dash.dependencies.Input("header", "children"),
 )
 def init_dropdown(value):
+    if UI_MODE == "docker":
+        upload_style = upload_display
+    else:
+        upload_style = playback_hide
+
     dropdown = [
         {
             "label": "Custom model",
@@ -372,7 +417,7 @@ def init_dropdown(value):
                 "disabled": True,
             }
         )
-    return dropdown
+    return [dropdown, upload_style]
 
 
 def load_hifigan(model_name, conf_name):
@@ -462,7 +507,115 @@ def preprocess_tokens(tokens, blank):
     return tokens
 
 
-def get_duration(wav_name, transcript):
+parser = (
+    nemo.collections.asr.data.audio_to_text.AudioToCharWithDursF0Dataset.make_vocab(
+        notation="phonemes",
+        punct=True,
+        spaces=True,
+        stresses=False,
+        add_blank_at="last",
+    )
+)
+
+arpadict = None
+
+
+def load_dictionary(dict_path):
+    arpadict = dict()
+    with open(dict_path, "r", encoding="utf8") as f:
+        for l in f.readlines():
+            word = l.split("  ")
+            assert len(word) == 2
+            arpadict[word[0].strip().upper()] = word[1].strip()
+    return arpadict
+
+
+def replace_words(input, dictionary):
+    regex = re.findall(r"[\w'-]+|[^\w'-]", input)
+    assert input == "".join(regex)
+    for i in range(len(regex)):
+        word = regex[i].upper()
+        if word in dictionary.keys():
+            regex[i] = "{" + dictionary[word] + "}"
+    return "".join(regex)
+
+
+def arpa_parse(input, model):
+    global arpadict
+    if arpadict is None:
+        arpadict = load_dictionary(DICT_PATH)
+    z = []
+    space = parser.labels.index(" ")
+    input = replace_words(input, arpadict)
+    while "{" in input:
+        if "}" not in input:
+            input.replace("{", "")
+        else:
+            pre = input[: input.find("{")]
+            if pre.strip() != "":
+                x = model.parse(text=pre.strip())
+                seq_ids = x.squeeze(0).cpu().detach().numpy()
+                z.extend(seq_ids)
+            z.append(space)
+
+            arpaword = input[input.find("{") + 1 : input.find("}")]
+            arpaword = (
+                arpaword.replace("0", "")
+                .replace("1", "")
+                .replace("2", "")
+                .strip()
+                .split(" ")
+            )
+
+            seq_ids = []
+            for x in arpaword:
+                if x == "":
+                    continue
+                if x.replace("_", " ") not in parser.labels:
+                    continue
+                seq_ids.append(parser.labels.index(x.replace("_", " ")))
+            seq_ids.append(space)
+            z.extend(seq_ids)
+            input = input[input.find("}") + 1 :]
+    if input != "":
+        x = model.parse(text=input.strip())
+        seq_ids = x.squeeze(0).cpu().detach().numpy()
+        z.extend(seq_ids)
+    if z[-1] == space:
+        z = z[:-1]
+    if z[0] == space:
+        z = z[1:]
+    return [
+        z[i] for i in range(len(z)) if (i == 0) or (z[i] != z[i - 1]) or (z[i] != space)
+    ]
+
+
+def to_arpa(input):
+    arpa = ""
+    z = []
+    space = parser.labels.index(" ")
+    while space in input:
+        z.append(input[: input.index(space)])
+        input = input[input.index(space) + 1 :]
+    z.append(input)
+    for y in z:
+        if len(y) == 0:
+            continue
+
+        arpaword = " {"
+        for s in y:
+            if parser.labels[s] == " ":
+                arpaword += "_ "
+            else:
+                arpaword += parser.labels[s] + " "
+        arpaword += "} "
+        if not arpaword.replace("{", "").replace("}", "").replace(" ", "").isalnum():
+            arpaword = arpaword.replace("{", "").replace(" }", "")
+        arpa += arpaword
+    return arpa.replace("  ", " ").replace(" }", "}").strip()
+
+
+def get_duration(wav_name, transcript, tokens):
     if not os.path.exists(os.path.join(RUN_PATH, "temp")):
         os.mkdir(os.path.join(RUN_PATH, "temp"))
     if "_" not in transcript:
@@ -483,16 +636,6 @@ def get_duration(wav_name, transcript):
         "sample_rate": 22050,
         "batch_size": 1,
     }
-
-    parser = (
-        nemo.collections.asr.data.audio_to_text.AudioToCharWithDursF0Dataset.make_vocab(
-            notation="phonemes",
-            punct=True,
-            spaces=True,
-            stresses=False,
-            add_blank_at="last",
-        )
-    )
 
     dataset = nemo.collections.asr.data.audio_to_text._AudioTextDataset(
         manifest_filepath=data_config["manifest_filepath"],
@@ -515,43 +658,14 @@ def get_duration(wav_name, transcript):
         )
 
         log_probs = log_probs[0].cpu().detach().numpy()
-        if "_" not in transcript:
-            seq_ids = test_sample[2][0].cpu().detach().numpy()
-        else:
-            pass
-            """arpa_input = (
-                transcript.replace("0", "")
-                .replace("1", "")
-                .replace("2", "")
-                .replace("_", " _ ")
-                .strip()
-                .split(" ")
-            )
-
-            seq_ids = []
-            for x in arpa_input:
-                if x == "":
-                    continue
-                if x.replace("_", " ") not in parser.labels:
-                    continue
-                seq_ids.append(parser.labels.index(x.replace("_", " ")))"""
-
-        seq_ids = test_sample[2][0].cpu().detach().numpy()
-        target_tokens = preprocess_tokens(seq_ids, blank_id)
+        target_tokens = preprocess_tokens(tokens, blank_id)
 
         f, p = forward_extractor(target_tokens, log_probs, blank_id)
         durs = backward_extractor(f, p)
 
-        arpa = ""
-        for s in seq_ids:
-            if parser.labels[s] == " ":
-                arpa += "_ "
-            else:
-                arpa += parser.labels[s] + " "
-
         del test_sample
-        return durs, arpa.strip(), seq_ids
-    return None, None, None
+        return durs
+    return None
 
 
 def crepe_f0(wav_path, hop_length=256):
@@ -629,17 +743,25 @@ def update_pitch_options(value):
     return ["pf" not in value, "dra" in value, "dra" in value]
 
 
-playback_style = {
-    "margin-top": "0.3em",
-    "margin-bottom": "0.3em",
-    "display": "block",
-    "width": "600px",
-    "max-width": "90vw",
-}
-
-playback_hide = {
-    "display": "none",
-}
+@app.callback(
+    dash.dependencies.Output("upload-label", "children"),
+    [
+        dash.dependencies.Input("upload-audio", "filename"),
+        dash.dependencies.Input("upload-audio", "contents"),
+    ],
+)
+def save_upload(uploaded_filenames, uploaded_file_contents):
+    try:
+        if uploaded_filenames is not None and uploaded_file_contents is not None:
+            for name, content in zip(uploaded_filenames, uploaded_file_contents):
+                if name.strip() == "":
+                    continue
+                data = content.encode("utf8").split(b";base64,")[1]
+                with open(os.path.join(RUN_PATH, name), "wb") as fp:
+                    fp.write(base64.decodebytes(data))
+    except Exception as e:
+        return str(e)
+    return "Uploaded " + str(len(uploaded_filenames)) + " file(s)"
 
 
 @app.callback(
@@ -720,6 +842,9 @@ def debug_pitch(n_clicks, pitch_clicks, current_f0s):
     return [f0_to_audio(current_f0s), playback_style, pitch_clicks]
 
 
+hifigan_sr = None
+
+
 def download_model(model, custom_model):
     try:
         global hifigan_sr, h2, denoiser_sr
@@ -759,7 +884,8 @@ def download_model(model, custom_model):
             )
         if not os.path.exists(sr_path):
             raise Exception("HiFI-GAN model failed to download!")
-        hifigan_sr, h2, denoiser_sr = load_hifigan(sr_path, "config_32k")
+        if hifigan_sr is None:
+            hifigan_sr, h2, denoiser_sr = load_hifigan(sr_path, "config_32k")
 
         return (
             None,
@@ -860,9 +986,11 @@ def generate_audio(
                     tndurs = None
                     tnpitch = None
                 tnmodel.eval()
+                tnpath = talknet_path
 
-            tokens = tnmodel.parse(text=transcript.strip())
-            arpa = ""
+            token_list = arpa_parse(transcript, tnmodel)
+            tokens = torch.IntTensor(token_list).view(1, -1).to(DEVICE)
+            arpa = to_arpa(token_list)
 
             if "dra" in pitch_options:
                 if tndurs is None or tnpitch is None:
@@ -874,7 +1002,7 @@ def generate_audio(
                     ]
                 spect = tnmodel.generate_spectrogram(tokens=tokens)
             else:
-                durs, arpa, t = get_duration(wav_name, transcript)
+                durs = get_duration(wav_name, transcript, token_list)
 
                 # Change pitch
                 if "pf" in pitch_options:
@@ -893,6 +1021,7 @@ def generate_audio(
 
             if hifipath != hifigan_path:
                 hifigan, h, denoiser = load_hifigan(hifigan_path, "config_v1")
+                hifipath = hifigan_path
 
             y_g_hat = hifigan(spect.float())
             audio = y_g_hat.squeeze()
