@@ -1010,6 +1010,8 @@ def generate_audio(
                     f0s = [x * f0_factor for x in f0s]
                     f0s_wo_silence = [x * f0_factor for x in f0s_wo_silence]
 
+                print(durs)
+                print(f0s)
                 spect = tnmodel.force_spectrogram(
                     tokens=tokens,
                     durs=torch.from_numpy(durs)
